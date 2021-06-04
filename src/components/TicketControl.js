@@ -5,7 +5,7 @@ import TicketDetail from './TicketDetail';
 import EditTicketForm from './EditTicketForm';
 import { connect } from 'react-redux';
 import * as a from './../actions';
-
+import { withFirestore } from 'react-redux-firebase'
 import PropTypes from "prop-types";
 
 
@@ -19,13 +19,6 @@ class TicketControl extends React.Component {
       selectedTicket: null,
       editing: false
     }
-  }
-
-  componentDidMount() {
-    this.waitTimeUpdateTimer = setInterval(() =>
-      this.updateTicketElapsedWaitTime(),
-      60000
-    );
   }
 
 
@@ -49,15 +42,15 @@ class TicketControl extends React.Component {
     this.setState({ editing: true });
   }
 
-  handleEditingTicketInList = (ticketToEdit) => {
-    const { dispatch } = this.props;
-    const action = a.addTicket(ticketToEdit);
-    dispatch(action);
-    this.setState({
-      editing: false,
-      selectedTicket: null
-    });
-  }
+  // handleEditingTicketInList = (ticketToEdit) => {
+  //   const { dispatch } = this.props;
+  //   const action = a.addTicket(ticketToEdit);
+  //   dispatch(action);
+  //   this.setState({
+  //     editing: false,
+  //     selectedTicket: null
+  //   });
+  // }
 
   handleDeletingTicket = (id) => {
     const { dispatch } = this.props;
@@ -67,16 +60,21 @@ class TicketControl extends React.Component {
   }
 
   handleChangingSelectedTicket = (id) => {
-    const selectedTicket = this.props.masterTicketList[id];
-    this.setState({ selectedTicket: selectedTicket });
+    this.props.firestore.get({ collection: 'tickets', doc: id }).then((ticket) => {
+      const firestoreTicket = {
+        names: ticket.get("names"),
+        location: ticket.get("location"),
+        issue: ticket.get("issue"),
+        id: ticket.id
+      }
+      this.setState({ selectedTicket: firestoreTicket });
+    });
   }
 
   handleAddingNewTicketToList = (newTicket) => {
     const { dispatch } = this.props;
-    const action = a.addTicket(newTicket);
+    const action = a.toggleForm();
     dispatch(action);
-    const action2 = a.toggleForm();
-    dispatch(action2);
   }
 
   handleClick = () => {
@@ -135,8 +133,7 @@ const mapStateToProps = state => {
 TicketControl = connect(mapStateToProps)(TicketControl);
 
 TicketControl.propTypes = {
-  masterTicketList: PropTypes.object,
   formVisibleOnPage: PropTypes.bool
 };
 
-export default TicketControl;
+export default withFirestore(TicketControl);

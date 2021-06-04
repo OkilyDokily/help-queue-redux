@@ -23,17 +23,6 @@ describe("rootReducer", () => {
     });
   });
 
-  test('Check that ADD_TICKET action works for both ticketListReducer and root reducer', () => {
-    const action = {
-      type: c.ADD_TICKET,
-      names: 'Ryan & Aimen',
-      location: '4b',
-      issue: 'Redux action is not working correctly.',
-      id: 1
-    }
-    store.dispatch(action);
-    expect(store.getState().masterTicketList).toEqual(ticketListReducer({}, action));
-  });
 
   test('Check that TOGGLE_FORM action works for both formVisibleReducer and root reducer', () => {
     const action = {
